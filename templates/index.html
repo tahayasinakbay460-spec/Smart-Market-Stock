@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="tr" data-bs-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Smart Inventory Manager — Akıllı Stok Takip</title>
+  <meta name="description" content="Yerel işletmeler için akıllı stok ve son kullanma tarihi takip sistemi." />
+
+  <!-- Bootstrap 5 Dark -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" />
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="/static/css/style.css" />
+</head>
+<body>
+
+<!-- ════════════════════ SIDEBAR ════════════════════ -->
+<div class="d-flex min-vh-100">
+  <nav id="sidebar" class="sidebar d-flex flex-column p-3">
+    <!-- Logo -->
+    <div class="sidebar-logo mb-4">
+      <span class="logo-icon"><i class="bi bi-boxes"></i></span>
+      <div>
+        <div class="fw-bold fs-6">Smart Inventory</div>
+        <div class="text-muted" style="font-size:.7rem">Stok & SKT Yönetimi</div>
+      </div>
+    </div>
+
+    <!-- Nav links -->
+    <ul class="nav flex-column gap-1 flex-grow-1">
+      <li class="nav-item">
+        <a class="nav-link sidebar-link active" href="#" data-section="dashboard">
+          <i class="bi bi-grid-1x2-fill me-2"></i>Dashboard
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link sidebar-link" href="#" data-section="products">
+          <i class="bi bi-box-seam me-2"></i>Ürünler
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link sidebar-link" href="#" data-section="logs">
+          <i class="bi bi-journal-text me-2"></i>İşlem Logları
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link sidebar-link" href="#" data-section="import">
+          <i class="bi bi-upload me-2"></i>CSV Import
+        </a>
+      </li>
+    </ul>
+
+    <!-- Bottom info -->
+    <div class="sidebar-footer text-muted" style="font-size:.7rem">
+      <i class="bi bi-circle-fill text-success me-1" style="font-size:.5rem"></i>Sistem Aktif
+    </div>
+  </nav>
+
+  <!-- ════════════════════ MAIN CONTENT ════════════════════ -->
+  <main class="flex-grow-1 p-4 overflow-auto">
+
+    <!-- Top bar -->
+    <div class="d-flex align-items-center justify-content-between mb-4">
+      <div>
+        <h1 class="page-title mb-0" id="pageTitle">Dashboard</h1>
+        <p class="text-muted mb-0" style="font-size:.85rem" id="pageSubtitle">Genel stok durumuna genel bakış</p>
+      </div>
+      <div class="d-flex gap-2 align-items-center">
+        <span class="badge bg-dark border border-secondary text-muted" id="lastUpdated"></span>
+        <button class="btn btn-primary btn-sm" id="btnAddProduct" onclick="openAddModal()">
+          <i class="bi bi-plus-lg me-1"></i>Ürün Ekle
+        </button>
+      </div>
+    </div>
+
+    <!-- ── DASHBOARD SECTION ── -->
+    <section id="sectionDashboard">
+      <!-- Stats cards -->
+      <div class="row g-3 mb-4">
+        <div class="col-6 col-xl-3">
+          <div class="stat-card card h-100">
+            <div class="card-body">
+              <div class="stat-icon stat-blue"><i class="bi bi-box-seam"></i></div>
+              <div class="stat-value" id="statTotal">—</div>
+              <div class="stat-label">Toplam Ürün</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-6 col-xl-3">
+          <div class="stat-card card h-100">
+            <div class="card-body">
+              <div class="stat-icon stat-red"><i class="bi bi-alarm"></i></div>
+              <div class="stat-value" id="statCritical">—</div>
+              <div class="stat-label">Kritik SKT</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-6 col-xl-3">
+          <div class="stat-card card h-100">
+            <div class="card-body">
+              <div class="stat-icon stat-yellow"><i class="bi bi-exclamation-triangle"></i></div>
+              <div class="stat-value" id="statLowStock">—</div>
+              <div class="stat-label">Düşük Stok</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-6 col-xl-3">
+          <div class="stat-card card h-100">
+            <div class="card-body">
+              <div class="stat-icon stat-green"><i class="bi bi-tag"></i></div>
+              <div class="stat-value" id="statCategories">—</div>
+              <div class="stat-label">Kategoriler</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick product table on dashboard -->
+      <div class="card glass-card">
+        <div class="card-header d-flex align-items-center justify-content-between">
+          <span class="fw-semibold"><i class="bi bi-list-ul me-2"></i>Kritik Ürünler</span>
+          <button class="btn btn-sm btn-outline-secondary" onclick="navigate('products')">Tümünü Gör</button>
+        </div>
+        <div class="card-body p-0">
+          <div id="dashboardTable"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── PRODUCTS SECTION ── -->
+    <section id="sectionProducts" class="d-none">
+      <!-- Filter bar -->
+      <div class="card glass-card mb-3">
+        <div class="card-body py-2">
+          <div class="row g-2 align-items-center">
+            <div class="col-md-5">
+              <div class="input-group input-group-sm">
+                <span class="input-group-text bg-dark border-secondary"><i class="bi bi-search"></i></span>
+                <input type="text" id="searchInput" class="form-control bg-dark border-secondary text-white" placeholder="Ürün adı veya barkod ara…" oninput="filterProducts()" />
+              </div>
+            </div>
+            <div class="col-md-3">
+              <select id="categoryFilter" class="form-select form-select-sm bg-dark border-secondary text-white" onchange="filterProducts()">
+                <option value="">Tüm Kategoriler</option>
+                <option>Gıda</option>
+                <option>İçecek</option>
+                <option>Temizlik</option>
+                <option>Kişisel Bakım</option>
+                <option>Eczane</option>
+                <option>Diğer</option>
+              </select>
+            </div>
+            <div class="col-md-4 text-end">
+              <button class="btn btn-sm btn-outline-info" onclick="openBarcodeModal()">
+                <i class="bi bi-upc-scan me-1"></i>Barkod Ara
+              </button>
+              <button class="btn btn-sm btn-primary ms-1" onclick="openAddModal()">
+                <i class="bi bi-plus-lg me-1"></i>Yeni Ürün
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Product table -->
+      <div class="card glass-card">
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0" id="productsTable">
+              <thead class="table-header">
+                <tr>
+                  <th style="width:52px"></th>
+                  <th>Ürün</th>
+                  <th>Kategori</th>
+                  <th>Stok</th>
+                  <th>SKT</th>
+                  <th>Durum</th>
+                  <th class="text-end">İşlemler</th>
+                </tr>
+              </thead>
+              <tbody id="productsBody">
+                <tr><td colspan="7" class="text-center py-5 text-muted"><div class="spinner-border spinner-border-sm me-2"></div>Yükleniyor…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── LOGS SECTION ── -->
+    <section id="sectionLogs" class="d-none">
+      <div class="card glass-card">
+        <div class="card-header fw-semibold"><i class="bi bi-journal-text me-2"></i>Stok İşlem Geçmişi</div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-sm align-middle mb-0">
+              <thead class="table-header">
+                <tr>
+                  <th>#</th>
+                  <th>Ürün</th>
+                  <th>İşlem</th>
+                  <th>Miktar</th>
+                  <th>Not</th>
+                  <th>Tarih</th>
+                </tr>
+              </thead>
+              <tbody id="logsBody">
+                <tr><td colspan="6" class="text-center py-5 text-muted"><div class="spinner-border spinner-border-sm me-2"></div>Yükleniyor…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── IMPORT SECTION ── -->
+    <section id="sectionImport" class="d-none">
+      <div class="row g-4">
+        <div class="col-lg-6">
+          <div class="card glass-card h-100">
+            <div class="card-header fw-semibold"><i class="bi bi-upload me-2"></i>CSV Dosyası Yükle</div>
+            <div class="card-body">
+              <p class="text-muted small mb-3">CSV dosyanız aşağıdaki başlıkları içermelidir (büyük/küçük harf duyarsız):</p>
+              <div class="bg-dark rounded p-3 mb-3 font-monospace small text-success">
+                name, stock, expiry_date, category, barcode, image_url
+              </div>
+              <div id="dropzone" class="dropzone text-center p-5 rounded border border-dashed mb-3" ondrop="handleDrop(event)" ondragover="event.preventDefault()">
+                <i class="bi bi-file-earmark-arrow-up display-5 text-muted mb-3 d-block"></i>
+                <p class="mb-1">Dosyayı buraya sürükleyin</p>
+                <p class="text-muted small">veya</p>
+                <label class="btn btn-outline-primary btn-sm">
+                  Dosya Seç <input type="file" id="csvFile" accept=".csv,.txt" class="d-none" onchange="handleFileSelect(this)" />
+                </label>
+              </div>
+              <div id="importResult" class="d-none"></div>
+              <button class="btn btn-success w-100" id="btnImport" onclick="importCSV()" disabled>
+                <i class="bi bi-check2-circle me-2"></i>İçe Aktar
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-6">
+          <div class="card glass-card h-100">
+            <div class="card-header fw-semibold"><i class="bi bi-file-earmark-text me-2"></i>Örnek CSV Şablonu</div>
+            <div class="card-body">
+              <p class="text-muted small">Aşağıdaki şablonu kopyalayıp düzenleyebilirsiniz:</p>
+              <div class="bg-dark rounded p-3 font-monospace small text-info" style="white-space:pre">name,stock,expiry_date,category,barcode,image_url
+Sütlaç 200g,50,2026-04-15,Gıda,8690810010082,
+Cola 1L,30,2026-06-01,İçecek,8699504011765,
+Çamaşır Suyu,20,2027-01-10,Temizlik,,
+Aspirin 500mg,100,2026-12-31,Eczane,8699502070023,
+Şampuan 400ml,15,,Kişisel Bakım,,</div>
+              <button class="btn btn-outline-secondary btn-sm mt-3 w-100" onclick="downloadTemplate()">
+                <i class="bi bi-download me-2"></i>Şablonu İndir
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- ════════════════════ MODALS ════════════════════ -->
+
+<!-- Add / Edit Product Modal -->
+<div class="modal fade" id="productModal" tabindex="-1" aria-labelledby="productModalLabel">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content bg-dark border-secondary">
+      <div class="modal-header border-secondary">
+        <h5 class="modal-title" id="productModalLabel"><i class="bi bi-box-seam me-2"></i>Ürün Ekle</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="editProductId" />
+        <div class="row g-3">
+          <div class="col-md-8">
+            <label class="form-label small fw-semibold">Ürün Adı *</label>
+            <input type="text" id="pName" class="form-control bg-secondary border-0 text-white" placeholder="Örn: Sütlaç 200g" />
+          </div>
+          <div class="col-md-4">
+            <label class="form-label small fw-semibold">Barkod</label>
+            <div class="input-group">
+              <input type="text" id="pBarcode" class="form-control bg-secondary border-0 text-white" placeholder="8690810…" />
+              <button class="btn btn-outline-info btn-sm" type="button" onclick="lookupBarcode()" title="Barkod ile ürün ara">
+                <i class="bi bi-upc-scan"></i>
+              </button>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label small fw-semibold">Kategori *</label>
+            <select id="pCategory" class="form-select bg-secondary border-0 text-white">
+              <option>Gıda</option>
+              <option>İçecek</option>
+              <option>Temizlik</option>
+              <option>Kişisel Bakım</option>
+              <option>Eczane</option>
+              <option>Diğer</option>
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label small fw-semibold">Stok Miktarı *</label>
+            <input type="number" id="pStock" class="form-control bg-secondary border-0 text-white" min="0" value="0" />
+          </div>
+          <div class="col-md-4">
+            <label class="form-label small fw-semibold">Son Kullanma Tarihi</label>
+            <input type="date" id="pExpiry" class="form-control bg-secondary border-0 text-white" />
+          </div>
+          <div class="col-12">
+            <label class="form-label small fw-semibold">Resim URL'si</label>
+            <input type="url" id="pImageUrl" class="form-control bg-secondary border-0 text-white" placeholder="https://…" oninput="previewImage()" />
+          </div>
+          <div class="col-12 text-center d-none" id="previewContainer">
+            <img id="imagePreview" src="" alt="Ürün resmi" class="img-thumbnail bg-dark border-secondary" style="max-height:120px" />
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer border-secondary">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+        <button type="button" class="btn btn-primary" onclick="saveProduct()">
+          <i class="bi bi-check-lg me-1"></i>Kaydet
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Stock Update Modal -->
+<div class="modal fade" id="stockModal" tabindex="-1" aria-labelledby="stockModalLabel">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content bg-dark border-secondary">
+      <div class="modal-header border-secondary">
+        <h5 class="modal-title" id="stockModalLabel"><i class="bi bi-arrow-left-right me-2"></i>Stok Güncelle</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="stockProductId" />
+        <p class="text-muted small mb-3" id="stockProductName"></p>
+        <div class="mb-3">
+          <label class="form-label small fw-semibold">İşlem Türü</label>
+          <div class="d-flex gap-2">
+            <button class="btn btn-success flex-fill stock-action-btn active" id="btnAdd" onclick="selectAction('add')">
+              <i class="bi bi-plus-circle me-1"></i>Stok Ekle
+            </button>
+            <button class="btn btn-outline-danger flex-fill stock-action-btn" id="btnRemove" onclick="selectAction('remove')">
+              <i class="bi bi-dash-circle me-1"></i>Stok Azalt
+            </button>
+          </div>
+          <input type="hidden" id="stockAction" value="add" />
+        </div>
+        <div class="mb-3">
+          <label class="form-label small fw-semibold">Miktar</label>
+          <input type="number" id="stockQty" class="form-control bg-secondary border-0 text-white" min="1" value="1" />
+        </div>
+        <div class="mb-3">
+          <label class="form-label small fw-semibold">Not (opsiyonel)</label>
+          <input type="text" id="stockNote" class="form-control bg-secondary border-0 text-white" placeholder="Örn: Yeni teslimat" />
+        </div>
+      </div>
+      <div class="modal-footer border-secondary">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+        <button type="button" class="btn btn-primary" onclick="submitStock()">
+          <i class="bi bi-check-lg me-1"></i>Güncelle
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Barcode Lookup Modal -->
+<div class="modal fade" id="barcodeModal" tabindex="-1" aria-labelledby="barcodeModalLabel">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content bg-dark border-secondary">
+      <div class="modal-header border-secondary">
+        <h5 class="modal-title" id="barcodeModalLabel"><i class="bi bi-upc-scan me-2"></i>Barkod Arama</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="input-group mb-3">
+          <input type="text" id="barcodeInput" class="form-control bg-secondary border-0 text-white" placeholder="Barkod numarası girin…" onkeydown="if(event.key==='Enter')searchBarcode()" />
+          <button class="btn btn-primary" onclick="searchBarcode()">
+            <i class="bi bi-search"></i>
+          </button>
+        </div>
+        <div id="barcodeResult"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast notification -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index:9999">
+  <div id="appToast" class="toast align-items-center border-0" role="alert">
+    <div class="d-flex">
+      <div class="toast-body fw-semibold" id="toastMessage"></div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+    </div>
+  </div>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<!-- App JS -->
+<script src="/static/js/app.js"></script>
+</body>
+</html>

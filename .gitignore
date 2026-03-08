@@ -1,0 +1,47 @@
+# ── Gizli Bilgiler (ASLA commit edilmez!) ──
+.env
+*.env
+.env.local
+.env.production
+
+# ── Python ──
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# ── Sanal Ortam ──
+venv/
+.venv/
+env/
+ENV/
+
+# ── Veritabanı (lokal SQLite) ──
+*.db
+*.sqlite
+*.sqlite3
+
+# ── IDE & Editor ──
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# ── Log dosyaları ──
+*.log
+logs/
+
+# ── Test & Coverage ──
+.coverage
+htmlcov/
+.pytest_cache/
+
+# ── Upload klasörü ──
+uploads/
