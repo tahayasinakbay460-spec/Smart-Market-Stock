@@ -1,0 +1,32 @@
+**🛒 Smart Market Stock**
+**Smart Inventory & Expiration Date Manager**
+This project is a Python Flask-based inventory management system designed for small businesses.
+It focuses on solving the two biggest problems in retail: stock shortages and expired products.
+
+🚀 Key Features
+
+Smart Expiration Tracking: Automatically categorizes products as Normal, Critical, or Expired based on their dates.
+Telegram Notifications: Sends real-time alerts via Telegram Bot API when stock levels drop below a critical threshold (≤ 5).
+Automated Data Entry: Integrated with Open Food Facts API to fetch product details automatically by scanning barcodes.
+Bulk Import: Supports CSV file uploads for quick inventory setup.
+Action Logs: Tracks every stock change with timestamps to maintain a clear history.
+
+🛠 Tech Stack
+
+Backend: Python 3.11 / Flask (RESTful Architecture)
+Frontend: Vanilla JavaScript (Fetch API) / Bootstrap 5
+Database: SQLite (Relational modeling with log tracking)
+Integrations: Telegram API / Open Food Facts API
+
+⚙️ Quick Start
+
+Install dependencies: pip install -r requirements.txt
+Environment Setup: Add your API keys to the .env file.
+Run the app: python app.py
+Access: Open http://localhost:5000 in your browser.
+
+📝 Roadmap (Upcoming Updates)
+
+*Multi-user authentication and role-based access control.
+*AI-powered stock prediction based on sales history.
+*Mobile-friendly UI optimization.
