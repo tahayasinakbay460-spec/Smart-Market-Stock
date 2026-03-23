@@ -1,4 +1,8 @@
 **🛒 Smart Market Stock**
+
+<p align="center">
+  <img src="Screenshot 2026-03-12 202700.png" width="45%" alt="AI Person Detection" />
+</p>
 **Smart Inventory & Expiration Date Manager**
 This project is a Python Flask-based inventory management system designed for small businesses.
 It focuses on solving the two biggest problems in retail: stock shortages and expired products.
