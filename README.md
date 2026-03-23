@@ -11,6 +11,13 @@ Automated Data Entry: Integrated with Open Food Facts API to fetch product detai
 Bulk Import: Supports CSV file uploads for quick inventory setup.
 Action Logs: Tracks every stock change with timestamps to maintain a clear history.
 
+🏗️ Technical Architecture
+
+- **Backend:** Flask (Python 3.11) with a RESTful approach.
+- **Database:** SQLite with relational modeling for inventory and logging.
+- **External API:** Integrated with **Open Food Facts API** for automated product metadata retrieval via barcode.
+- **Notifications:** Real-time stock alerts powered by **Telegram Bot API**.
+  
 🛠 Tech Stack
 
 Backend: Python 3.11 / Flask (RESTful Architecture)
